@@ -1,6 +1,6 @@
 {
   "name": "n8n-open-cli",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "CLI tool for n8n self-hosted instance Public API",
   "repository": {
     "type": "git",

@@ -10,18 +10,23 @@ Built with **Node.js + TypeScript**.
 
 | | AI Mode (default) | Human Mode (`--human`) |
 |---|---|---|
-| **Output** | Single-line JSON `{"ok":true,"data":...}` | Colored tables, icons, friendly messages |
+| **Output** | JSONL for lists, single JSON for items | Colored tables, icons, friendly messages |
 | **Colors** | None (no ANSI escape codes) | Full chalk coloring |
 | **Errors** | `{"ok":false,"error":"...","code":401}` | `✘ Unauthorized` |
 | **Ideal for** | LLM agents, MCP tools, scripts, CI/CD | Terminal users |
 
-Every command outputs a **deterministic JSON envelope** by default:
+Every command outputs **deterministic JSON** by default:
 
 ```jsonc
-// Success
-{"ok":true,"data":[...],"nextCursor":"..."}
+// List response → JSONL (one JSON object per line, AI-friendly for large datasets)
+{"id":"1","name":"Workflow A","active":true,...}
+{"id":"2","name":"Workflow B","active":false,...}
+{"__cursor":"MTIzZTQ1NjctZTg5Yi0xMmQz..."}   // only if there are more pages
 
-// Success (action)
+// Single item response → JSON envelope
+{"ok":true,"data":{"id":"123","name":"My Workflow",...}}
+
+// Action response (no data)
 {"ok":true,"data":null}
 
 // Error
@@ -92,10 +97,13 @@ Environment variables take precedence over stored config.
 ### AI Mode (default) — structured JSON output
 
 ```bash
-# Every command returns {"ok":true/false, "data":..., "error":...}
+# List commands output JSONL — one JSON object per line
 n8n-open-cli workflow list
-# {"ok":true,"data":[{"id":"1","name":"My Workflow","active":true,...}],"nextCursor":"..."}
+# {"id":"1","name":"My Workflow","active":true,...}
+# {"id":"2","name":"Another","active":false,...}
+# {"__cursor":"MTIzZTQ1..."}
 
+# Single-item commands output JSON envelope
 n8n-open-cli workflow get 123
 # {"ok":true,"data":{"id":"123","name":"My Workflow",...}}
 
@@ -111,7 +119,8 @@ n8n-open-cli workflow delete 123
 ```bash
 # Only return specific fields — saves tokens for AI agents
 n8n-open-cli workflow list --fields id,name,active
-# {"ok":true,"data":[{"id":"1","name":"My Workflow","active":true},...]}}
+# {"id":"1","name":"My Workflow","active":true}
+# {"id":"2","name":"Another","active":false}
 
 n8n-open-cli execution list --fields id,status,workflowId
 ```
@@ -252,18 +261,26 @@ result = subprocess.run(
     ["n8n-open-cli", "workflow", "list", "--fields", "id,name,active"],
     capture_output=True, text=True
 )
-response = json.loads(result.stdout)
-if response["ok"]:
-    workflows = response["data"]
+# List commands output JSONL — parse each line
+workflows = [json.loads(line) for line in result.stdout.strip().splitlines()]
+# Filter out cursor metadata if present
+cursor = None
+if workflows and "__cursor" in workflows[-1]:
+    cursor = workflows.pop()["__cursor"]
 ```
 
 ### As an MCP Tool
 
-The deterministic JSON envelope makes it trivial to wrap as an MCP tool:
+The deterministic output format makes it trivial to wrap as an MCP tool:
 
 ```typescript
+// List commands → JSONL (one object per line)
 const { stdout } = await exec(`n8n-open-cli workflow list --fields id,name,active`);
-const result = JSON.parse(stdout);  // always { ok, data?, error?, code? }
+const items = stdout.trim().split('\n').map(line => JSON.parse(line));
+
+// Single-item commands → JSON envelope
+const { stdout: out } = await exec(`n8n-open-cli workflow get 123`);
+const result = JSON.parse(out);  // { ok, data?, error?, code? }
 ```
 
 ### Error handling for agents

@@ -33,15 +33,29 @@ export function isHumanMode(): boolean {
  */
 export function output(response: ApiResponse, opts?: HumanOutputOpts): void {
   if (!_humanMode) {
-    // AI mode: deterministic single JSON line
-    const obj: Record<string, any> = { ok: response.ok };
-    if (response.ok) {
-      obj.data = response.data ?? null;
-      if (response.nextCursor) obj.nextCursor = response.nextCursor;
-    } else {
-      obj.error = response.error ?? 'Unknown error';
+    // AI mode
+    if (!response.ok) {
+      const obj: Record<string, any> = { ok: false, error: response.error ?? 'Unknown error' };
       if (response.code) obj.code = response.code;
+      process.stdout.write(JSON.stringify(obj) + '\n');
+      return;
     }
+
+    const data = response.data;
+
+    // List responses → JSONL: one JSON object per line (AI-friendly, handles large datasets)
+    if (Array.isArray(data)) {
+      for (const item of data) {
+        process.stdout.write(JSON.stringify(item) + '\n');
+      }
+      if (response.nextCursor) {
+        process.stdout.write(JSON.stringify({ __cursor: response.nextCursor }) + '\n');
+      }
+      return;
+    }
+
+    // Single-item responses → single JSON line
+    const obj: Record<string, any> = { ok: true, data: data ?? null };
     process.stdout.write(JSON.stringify(obj) + '\n');
     return;
   }
