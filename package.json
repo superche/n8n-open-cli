@@ -2,6 +2,10 @@
   "name": "n8n-open-cli",
   "version": "2.2.0",
   "description": "CLI tool for n8n self-hosted instance Public API",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/superche/n8n-open-cli"
+  },
   "main": "dist/index.js",
   "files": [
     "dist",
