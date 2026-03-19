@@ -1,0 +1,34 @@
+{
+  "name": "@che/n8n-open-cli",
+  "version": "2.1.0",
+  "description": "CLI tool for n8n self-hosted instance Public API",
+  "main": "dist/index.js",
+  "bin": {
+    "n8n-open-cli": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "lint": "eslint src/**/*.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["n8n", "cli", "api", "workflow", "automation"],
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.5",
+    "conf": "^10.2.0",
+    "ora": "^5.4.1",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/node-fetch": "^2.6.11",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
