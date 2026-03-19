@@ -1,8 +1,12 @@
 {
-  "name": "@che/n8n-open-cli",
+  "name": "n8n-open-cli",
   "version": "2.1.0",
   "description": "CLI tool for n8n self-hosted instance Public API",
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "bin": {
     "n8n-open-cli": "./dist/index.js"
   },

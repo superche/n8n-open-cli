@@ -48,10 +48,10 @@ Every command outputs a **deterministic JSON envelope** by default:
 
 ```bash
 # Global install
-npm install -g @che/n8n-open-cli
+npm install -g n8n-open-cli
 
 # Or use npx directly
-npx @che/n8n-open-cli workflow list
+npx n8n-open-cli workflow list
 ```
 
 This installs the CLI binary as `n8n-open-cli`, so all examples below keep using the `n8n-open-cli` command name.
