@@ -56,7 +56,9 @@ n8n-cli config set --base-url https://capcut-n8n.bytedance.net --api-key <key>
 
 **`--fields` 参数**：列表/查询命令支持 `--fields id,name,active` 来只返回指定字段，减少输出量。优先使用此参数，只获取回答用户所需的字段。
 
-## Dry-Run 模式
+## Dry-Run 模式（重要：写操作前必须先执行）
+
+> **⚠️ 核心原则：所有写操作执行前，必须先使用 `--dry-run` 进行预览，将变更内容展示给用户进行人工 review，获得用户确认后再执行实际操作。严禁跳过 dry-run 直接执行写操作。**
 
 所有**写操作**（create / update / delete / activate / deactivate / transfer / set-role / set-tags / add-user / remove-user）都支持 `--dry-run` 参数。
 
@@ -249,12 +251,15 @@ n8n-cli config clear
 - 如果结果有 `nextCursor`，告知用户还有更多数据，询问是否继续获取
 - 使用 `--limit` 控制每次返回数量
 
-### 3. 写操作确认（Dry-Run 优先）
+### 3. 写操作确认（Dry-Run 强制前置）
 
-- **所有写操作**执行前，**优先使用 `--dry-run`** 预览变更
-- 将 dry-run 输出的 `changes` 数组以可读格式展示给用户
-- 用户确认后，去掉 `--dry-run` 执行实际操作
+> **⚠️ 这是最重要的执行策略：任何写操作都不得跳过 dry-run 直接执行。**
+
+- **所有写操作**执行前，**必须先使用 `--dry-run`** 预览变更，不得跳过
+- 将 dry-run 输出的 `changes` 数组以可读格式展示给用户，等待用户人工 review
+- **只有用户明确确认后**，才能去掉 `--dry-run` 执行实际操作
 - 批量操作（如批量删除）必须逐一 dry-run 或得到明确的批量授权
+- 即使用户直接要求执行写操作，也应先 dry-run 预览并展示给用户确认
 
 ### 4. 错误处理
 

@@ -125,6 +125,31 @@ n8n-open-cli --human execution list --status error
 n8n-open-cli --human tag create --name production
 ```
 
+### Dry-Run Mode (Recommended before any write operation)
+
+All **write operations** (create / update / delete / activate / deactivate / transfer / set-role / set-tags / add-user / remove-user) support `--dry-run`.
+
+> **Best Practice:** Always run `--dry-run` first to preview changes, review the diff, and only execute the actual command after manual confirmation. This prevents accidental data loss or unintended modifications.
+
+When `--dry-run` is used, the CLI will **not** execute the actual operation. Instead, it fetches the current state, computes the diff, and outputs a preview:
+
+```bash
+# Step 1: Preview the change
+n8n-open-cli workflow activate 123 --dry-run
+# {"ok":true,"dryRun":true,"resource":"workflow","id":"123","action":"activate",
+#  "changes":[{"field":"active","before":false,"after":true}]}
+
+# Step 2: Review the output, then execute
+n8n-open-cli workflow activate 123
+
+# Another example: preview before deleting
+n8n-open-cli workflow delete 456 --dry-run
+# Review what will be deleted, then confirm:
+n8n-open-cli workflow delete 456
+```
+
+With `--human` mode, dry-run shows a colored diff view (red for removed/old values, green for added/new values) with a `DRY-RUN` warning banner.
+
 ### Workflow Management
 
 ```bash
@@ -143,6 +168,8 @@ n8n-open-cli workflow transfer <id> --destination-project-id <pid>
 n8n-open-cli workflow get-tags <id>
 n8n-open-cli workflow set-tags <id> --tag-ids "t1,t2"
 ```
+
+> **Tip:** For any write command above, add `--dry-run` to preview changes before executing.
 
 ### Execution Management
 
